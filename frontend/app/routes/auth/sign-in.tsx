@@ -1,16 +1,31 @@
 import React from 'react'
-import { signInSchema } from '@/lib/schema'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Link } from 'react-router-dom'
+
+import { signInSchema } from '@/lib/schema'
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+  FormLabel,
+} from '@/components/ui/form'
 
-type SigninFormData = z.infer<typeof signInSchema>
+type SignInFormData = z.infer<typeof signInSchema>
 
 const SignIn = () => {
-  const form = useForm<SigninFormData>({
+  const form = useForm<SignInFormData>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
       email: '',
@@ -18,36 +33,70 @@ const SignIn = () => {
     },
   })
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = form
+  const [loading, setLoading] = React.useState(false)
 
-  const onSubmit = (values: SigninFormData) => {
-    console.log(values)
+  const onSubmit = async (values: SignInFormData) => {
+    setLoading(true)
+    try {
+      console.log('Sign in form submitted:', values)
+      // Add your sign-in logic here (e.g., API call)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-muted/40 p-4">
-      <Card className="max-w-md w-full p-6">
-        <CardHeader>
-          <CardTitle>Welcome back!</CardTitle>
-          <CardDescription>Sign in to your account to continue</CardDescription>
+    <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
+      <Card className="w-full max-w-lg shadow-xl rounded-2xl border border-gray-200">
+        <CardHeader className="text-center">
+          <CardTitle className="text-3xl font-bold">Project Manager Login</CardTitle>
+          <CardDescription className="text-base">
+            Access your dashboard by signing into your account
+          </CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <Input placeholder="Email" {...register('email')} />
-            {errors.email && <p className="text-red-500 text-sm">{errors.email.message}</p>}
-          </div>
-          <div>
-            <Input type="password" placeholder="Password" {...register('password')} />
-            {errors.password && <p className="text-red-500 text-sm">{errors.password.message}</p>}
-          </div>
-          <Button type="submit" className="w-full">
-            Sign In
-          </Button>
-        </form>
+
+        <div className="px-6 pb-2 text-center text-sm text-gray-500">
+          Don't have an account?{' '}
+          <Link to="/sign-up" className="text-blue-500 hover:underline">
+            Sign Up
+          </Link>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 px-6 pb-8">
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email Address</FormLabel>
+                  <FormControl>
+                    <Input placeholder="you@example.com" type="email" autoComplete="email" {...field} />
+                  </FormControl>
+                  <FormMessage className="text-blue-500 text-sm" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="password"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter your password" type="password" autoComplete="current-password" {...field} />
+                  </FormControl>
+                  <FormMessage className="text-blue-500 text-sm" />
+                </FormItem>
+              )}
+            />
+
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Signing In...' : 'Sign In'}
+            </Button>
+          </form>
+        </Form>
       </Card>
     </div>
   )
