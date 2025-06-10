@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link } from 'react-router-dom'
 
-import { signUpSchema } from '@/lib/schema'
 import {
   Card,
   CardHeader,
@@ -18,9 +17,21 @@ import {
   FormControl,
   FormField,
   FormItem,
-  FormMessage,
   FormLabel,
+  FormMessage,
 } from '@/components/ui/form'
+
+const signUpSchema = z
+  .object({
+    name: z.string().min(2, 'Name is required'),
+    email: z.string().email('Invalid email'),
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: 'Passwords do not match',
+    path: ['confirmPassword'],
+  })
 
 type SignUpFormData = z.infer<typeof signUpSchema>
 
@@ -35,29 +46,23 @@ const SignUp = () => {
     },
   })
 
-  const [loading, setLoading] = React.useState(false)
-
-  const onSubmit = async (values: SignUpFormData) => {
-    setLoading(true)
-    try {
-      console.log('Sign up form submitted:', values)
-      // Your sign-up logic here (e.g., API call)
-    } finally {
-      setLoading(false)
-    }
+  const onSubmit = (values: SignUpFormData) => {
+    console.log('Form submitted:', values)
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-muted/40 p-4">
-      <Card className="w-full max-w-lg  shadow-xl rounded-2xl border border-gray-200">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold">Create Your Account</CardTitle>
-          <CardDescription className="text-base">
-            Start managing your projects by creating a new account
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <Card className="w-full max-w-3xl p-6 bg-white shadow-sm border border-gray-200 rounded-xl">
+        <CardHeader className="text-center mb-2">
+          <CardTitle className="text-2xl font-semibold text-gray-800">
+            Create Your Account
+          </CardTitle>
+          <CardDescription className="text-sm text-gray-500">
+            Sign up to manage your projects
           </CardDescription>
         </CardHeader>
 
-        <div className="px-6 pb-2 text-center text-sm text-gray-500">
+        <div className="text-center text-sm text-gray-500 mb-4">
           Already have an account?{' '}
           <Link to="/sign-in" className="text-blue-500 hover:underline">
             Sign In
@@ -65,35 +70,33 @@ const SignUp = () => {
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 px-6 pb-8">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-2 gap-4 px-6 pb-4">
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="col-span-2">
                   <FormLabel>Full Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Your name" {...field} />
+                    <Input {...field} placeholder="John Doe" className="w-full h-9" />
                   </FormControl>
                   <FormMessage className="text-blue-500 text-sm" />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Email Address</FormLabel>
+                <FormItem className="col-span-2">
+                  <FormLabel>Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="you@example.com" type="email" autoComplete="email" {...field} />
+                    <Input {...field} type="email" placeholder="you@example.com" className="w-full h-9" />
                   </FormControl>
                   <FormMessage className="text-blue-500 text-sm" />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="password"
@@ -101,13 +104,12 @@ const SignUp = () => {
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="Create a password" type="password" autoComplete="new-password" {...field} />
+                    <Input {...field} type="password" placeholder="••••••" className="w-full h-9" />
                   </FormControl>
                   <FormMessage className="text-blue-500 text-sm" />
                 </FormItem>
               )}
             />
-
             <FormField
               control={form.control}
               name="confirmPassword"
@@ -115,16 +117,17 @@ const SignUp = () => {
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input placeholder="Re-enter your password" type="password" autoComplete="new-password" {...field} />
+                    <Input {...field} type="password" placeholder="••••••" className="w-full h-9" />
                   </FormControl>
                   <FormMessage className="text-blue-500 text-sm" />
                 </FormItem>
               )}
             />
-
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Creating Account...' : 'Sign Up'}
-            </Button>
+            <div className="col-span-2 mt-2">
+              <Button type="submit" className="w-full h-10">
+                Sign Up
+              </Button>
+            </div>
           </form>
         </Form>
       </Card>
